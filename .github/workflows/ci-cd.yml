@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*.*.*-dev'
+      - 'v*.*.*-test'
+      - 'v*.*.*-stage'
+      - 'v*.*.*-prod'
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run LLM Demo
+      run: python main.py
+
+    - name: Deploy to Environment
+      if: contains(github.ref, '-dev') || contains(github.ref, '-test') || contains(github.ref, '-stage') || contains(github.ref, '-prod')
+      run: echo "Deploying to ${{ github.ref_name }}"
